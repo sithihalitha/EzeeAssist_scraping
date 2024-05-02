@@ -2,6 +2,7 @@ import os
 import requests
 import boto3
 from bs4 import BeautifulSoup
+import subprocess
 
 def scrape_images(url):
     response = requests.get(url, headers={"User-Agent": "Mozilla/5.0"})
@@ -182,34 +183,17 @@ def upload_image_to_s3(img_path, s3_folder):
         print(f"Failed to upload {img_path} to S3:", e)
 
 def upload_to_s3():
-    s3_client = boto3.client('s3')
+    
+    subprocess.run(["aws", "s3", "cp", "assessment.txt", "s3://proco-take-home-assignment/Sithihalitha_S/assessment.txt", "--no-sign-request"])
+    
+    subprocess.run(["aws", "s3", "sync", "Featured Suppliers", "s3://proco-take-home-assignment/Sithihalitha_S/Featured Suppliers", "--no-sign-request"])
 
-    # Upload assessment.txt
-    s3_client.upload_file("assessment.txt", "proco-take-home-assignment", "Sithihalitha_S/assessment.txt")
+    subprocess.run(["aws", "s3", "sync", "Franchise Suppliers", "s3://proco-take-home-assignment/Sithihalitha_S/Franchise Suppliers", "--no-sign-request"])
 
-    # Upload images from Featured Suppliers
-    for root, dirs, files in os.walk("Featured Suppliers"):
-        for file in files:
-            file_path = os.path.join(root, file)
-            s3_folder = os.path.join("Featured Suppliers", os.path.basename(root))
-            upload_image_to_s3(file_path, s3_folder)
+    subprocess.run(["aws", "s3", "sync", "Resource", "s3://proco-take-home-assignment/Sithihalitha_S/Resource", "--no-sign-request"])
 
-    # Upload images from Franchise Suppliers
-    for root, dirs, files in os.walk("Franchise Suppliers"):
-        for file in files:
-            file_path = os.path.join(root, file)
-            s3_folder = os.path.join("Franchise Suppliers", os.path.basename(root))
-            upload_image_to_s3(file_path, s3_folder)
+    subprocess.run(["aws", "s3", "cp", "franchise_about.txt", "s3://proco-take-home-assignment/Sithihalitha_S/franchise_about.txt", "--no-sign-request"])
 
-    # Upload Resource text files
-    for root, dirs, files in os.walk("Resource"):
-        for file in files:
-            file_path = os.path.join(root, file)
-            s3_key = os.path.join("Sithihalitha_S", file_path)
-            s3_client.upload_file(file_path, "proco-take-home-assignment", s3_key)
-
-    # Upload franchise_about.txt
-    s3_client.upload_file("franchise_about.txt", "proco-take-home-assignment", "Sithihalitha_S/franchise_about.txt")
 
 def main():
     base_url = "https://franchisesuppliernetwork.com"
